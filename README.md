@@ -9,14 +9,13 @@ Tested by jplaced for Ubuntu 20.04, ROS Noetic.
 Installation:
 ------------
 Required dependencies:
-  * Python3
-  * ROS Noetic
-  * Gazebo
-  * OpenCV
-  * Eigen3
-  * g2o
-  * python3-catkin-tools
-  * Python3 modules: numpy, networkx, matplotlib, scikit-learn,
+  * Python3 (numpy, networkx, matplotlib, scikit-learn)
+  * ROS Noetic & Gazebo
+  * OpenCV: https://opencv.org/
+  * Eigen3: https://eigen.tuxfamily.org/dox/GettingStarted.html
+  * g2o: Downloand and install from https://github.com/RainerKuemmerle/g2o.
+  * python3 catkin tools (sudo apt-get install python3-catkin-tools)
+  * SuiteSparse (sudo apt-get install libsuitesparse-dev)
 
 Dependencies contained in 3d party folder working in ROS Noetic:
   * kobuki_plugins
@@ -24,10 +23,13 @@ Dependencies contained in 3d party folder working in ROS Noetic:
 
 Build:
 ------------
-1. Download repo
-2. >cd active_graph_slam
-3. >catkin b
-4. Edit path in graph_d_exploration/param/mapping_karto_g2o.yaml and graph_d_exploration/scripts/constants.py
+1. Clone repository
+2. Build:
+
+>cd active_graph_slam
+>catkin b
+
+4. Edit path where graphs are saved/read, in graph_d_exploration/param/mapping_karto_g2o.yaml and graph_d_exploration/scripts/constants.py
 
 Run simulation:
 ------------
