@@ -6,9 +6,9 @@ Code used for the paper "Fast Uncertainty Quantification for Active Graph SLAM",
 Tested by jplaced for Ubuntu 20.04, ROS Noetic.
 
 
-Installation:
+Dependencies:
 ------------
-Required dependencies:
+
   * Python3 (numpy, networkx, matplotlib, scikit-learn)
   * ROS Noetic & Gazebo
   * OpenCV: https://opencv.org/
@@ -17,7 +17,7 @@ Required dependencies:
   * python3 catkin tools (sudo apt-get install python3-catkin-tools)
   * SuiteSparse (sudo apt-get install libsuitesparse-dev)
 
-Dependencies contained in 3d party folder working in ROS Noetic:
+Contained in 3d party folder working in ROS Noetic:
   * kobuki_plugins
   * open_karto
 
