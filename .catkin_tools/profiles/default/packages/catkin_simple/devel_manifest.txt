@@ -1,6 +1,0 @@
-catkin_simple
-/home/julio/source/active_slam_project_github/devel/.private/catkin_simple/cmake.lock /home/julio/source/active_slam_project_github/devel/./cmake.lock
-/home/julio/source/active_slam_project_github/devel/.private/catkin_simple/share/catkin_simple/cmake/catkin_simple-extras.cmake /home/julio/source/active_slam_project_github/devel/share/catkin_simple/cmake/catkin_simple-extras.cmake
-/home/julio/source/active_slam_project_github/devel/.private/catkin_simple/share/catkin_simple/cmake/catkin_simpleConfig.cmake /home/julio/source/active_slam_project_github/devel/share/catkin_simple/cmake/catkin_simpleConfig.cmake
-/home/julio/source/active_slam_project_github/devel/.private/catkin_simple/share/catkin_simple/cmake/catkin_simpleConfig-version.cmake /home/julio/source/active_slam_project_github/devel/share/catkin_simple/cmake/catkin_simpleConfig-version.cmake
-/home/julio/source/active_slam_project_github/devel/.private/catkin_simple/lib/pkgconfig/catkin_simple.pc /home/julio/source/active_slam_project_github/devel/lib/pkgconfig/catkin_simple.pc

@@ -1,1 +1,0 @@
-/home/julio/source/active_slam_project_github/devel/.private/slam_karto_g2o/share/slam_karto_g2o/cmake/slam_karto_g2oConfig-version.cmake

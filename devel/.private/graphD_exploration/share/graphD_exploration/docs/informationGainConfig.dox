@@ -1,6 +1,0 @@
-\subsubsection parameters ROS parameters
-
-Reads and maintains the following parameters on the ROS server
-
-- \b "~ig_threshold" : \b [double] A double parameter min: 0.0, default: 0.45, max: 1.0
-

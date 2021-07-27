@@ -1,8 +1,0 @@
-prefix=/home/julio/source/active_slam_project_github/devel/.private/kobuki_plugins
-
-Name: kobuki_plugins
-Description: Description of kobuki_plugins
-Version: 0.5.7
-Cflags: -I/home/julio/source/active_slam_project_github/src/3dParty/kobuki_plugins/include
-Libs: -L${prefix}/lib -lgazebo_ros_kobuki
-Requires: gazebo_ros gazebo_plugins geometry_msgs kobuki_msgs nav_msgs roscpp sensor_msgs std_msgs tf

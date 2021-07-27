@@ -1,1 +1,0 @@
-/home/julio/source/active_slam_project_github/devel/.private/rrt_exploration/include/rrt_exploration/PointArray.h

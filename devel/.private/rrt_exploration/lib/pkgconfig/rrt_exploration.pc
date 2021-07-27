@@ -1,8 +1,0 @@
-prefix=/home/julio/source/active_slam_project_github/devel/.private/rrt_exploration
-
-Name: rrt_exploration
-Description: Description of rrt_exploration
-Version: 1.0.0
-Cflags: -I/home/julio/source/active_slam_project_github/devel/.private/rrt_exploration/include
-Libs: -L${prefix}/lib 
-Requires: message_runtime
