@@ -27,6 +27,7 @@ Build:
 2. Build:
 
 >cd active_graph_slam
+
 >catkin b
 
 4. Edit path where graphs are saved/read, in graph_d_exploration/param/mapping_karto_g2o.yaml and graph_d_exploration/scripts/constants.py
