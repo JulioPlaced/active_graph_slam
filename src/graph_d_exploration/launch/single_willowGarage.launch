@@ -1,0 +1,31 @@
+<!-- jplaced@unizar.es
+ 2021, Universidad de Zaragoza -->
+
+<!--  Launch file for single robot on Gazebo -->
+<launch>
+  <env name="GAZEBO_RESOURCE_PATH" value="$(find graph_d_exploration)/launch/include/meshes"/>
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="gui" value="true"/>
+    <arg name="use_sim_time" value="true"/>
+    <arg name="debug" value="0"/>
+    <arg name="world_name" value="$(find graph_d_exploration)/launch/include/worlds/willowgarage_modified.world"/>
+    <arg name="verbose" value="true"/>
+  </include>
+
+  <!-- <group ns="/robot_1"> -->
+  <include file="$(find graph_d_exploration)/launch/include/robot.launch.xml">
+    <arg name="robot_name" value="robot_1"/>
+    <arg name="init_pose" value="-x 0.0 -y 0.0 -z 0.0 -R 0.0 -P 0.0 -Y 0.0"/>
+  </include>
+
+  <include file="$(find graph_d_exploration)/launch/include/move_baseSafe.launch">
+    <arg name="namespace" value="robot_1"/>
+  </include>
+  <!-- </group> -->
+
+  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find graph_d_exploration)/launch/include/rviz_config/single.rviz">
+    <remap from="move_base_simple/goal" to="move_base_simple/goal"/>
+  </node>
+
+</launch>

@@ -1,0 +1,5 @@
+[35m[1mScanning dependencies of target slam_karto_g2o[0m
+[ 33%] [32mBuilding CXX object CMakeFiles/slam_karto_g2o.dir/src/slam_karto_g2o.cpp.o[0m
+[ 66%] [32mBuilding CXX object CMakeFiles/slam_karto_g2o.dir/src/G2OSolver.cpp.o[0m
+[100%] [32m[1mLinking CXX executable /home/julio/source/active_slam_project_github/devel/.private/slam_karto_g2o/lib/slam_karto_g2o/slam_karto_g2o[0m
+[100%] Built target slam_karto_g2o

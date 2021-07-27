@@ -1,0 +1,52 @@
+# jplaced@unizar.es
+# 2021, Universidad de Zaragoza
+# This file contains common configuration options for Karto g2o SLAM
+# See http://wiki.ros.org/slam_karto
+
+# General Parameters
+throttle_scans: 2.0 # default 1
+map_update_interval: 2.0 # default 5
+resolution: 0.05                                # default 0.05
+transform_publish_period: 0.05                  # default 0.05
+
+# Scan Matching Parameters
+use_scan_matching: true                         # default true
+use_scan_barycenter: true                       # default true
+minimum_travel_distance: 0.3 # default 0.2
+minimum_travel_heading: 0.3 # default 0.174
+scan_buffer_size: 70                            # default 70 = scan_buffer_maximum_scan_distance / minimum_travel_distance
+scan_buffer_maximum_scan_distance: 20           # default 20
+link_match_minimum_response_fine: 0.8           # default 0.8
+link_scan_maximum_distance: 10.0                # default 10
+
+# Loop Closing Parameters
+loop_search_maximum_distance: 6.0 # default 4
+do_loop_closing: true                           # default true
+loop_match_minimum_chain_size: 8 # default 10
+loop_match_maximum_variance_coarse: 0.4         # default 0.4
+loop_match_minimum_response_coarse: 0.8         # default 0.8
+loop_match_minimum_response_fine: 0.8           # default 0.8
+
+# Correlation Parameters
+correlation_search_space_dimension: 0.3         # default 0.3
+correlation_search_space_resolution: 0.01       # default 0.01
+correlation_search_space_smear_deviation: 0.03  # default 0.03
+
+# Correlation Loop Closure Parameters
+loop_search_space_dimension: 4.0 # default 8
+loop_search_space_resolution: 0.08 # default 0.05
+loop_search_space_smear_deviation: 0.04 # default 0.03
+
+# Scan Matcher Parameters
+distance_variance_penalty: 0.3                  # default 0.3
+angle_variance_penalty: 0.349                   # default 0.349
+fine_search_angle_offset: 0.00349               # default 0.00349
+coarse_search_angle_offset: 0.349               # default 0.349
+coarse_angle_resolution: 0.0349                 # default 0.0349
+minimum_angle_penalty: 0.9                      # default 0.9
+minimum_distance_penalty: 0.5                   # default 0.5
+use_response_expansion: false                   # default false
+
+# Backend params
+use_robust_kernel: false
+graph_dir: /home/julio/source/active_slam_project_github/graph.g2o

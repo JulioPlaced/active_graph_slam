@@ -1,0 +1,8 @@
+prefix=/home/julio/source/active_slam_project_github/install
+
+Name: slam_karto_g2o
+Description: Description of slam_karto_g2o
+Version: 0.7.3
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

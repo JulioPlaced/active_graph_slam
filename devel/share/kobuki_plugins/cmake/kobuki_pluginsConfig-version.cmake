@@ -1,0 +1,1 @@
+/home/julio/source/active_slam_project_github/devel/.private/kobuki_plugins/share/kobuki_plugins/cmake/kobuki_pluginsConfig-version.cmake

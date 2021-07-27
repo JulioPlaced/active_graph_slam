@@ -1,0 +1,21 @@
+# jplaced@unizar.es
+# 2021, Universidad de Zaragoza
+# This file contains common configuration options for the global costmap
+
+global_costmap:
+  global_frame: map
+  robot_base_frame: base_link
+  update_frequency: 0.5
+  publish_frequency: 1.0
+
+  always_send_full_costmap: false
+  transform_tolerance: 0.5
+
+  static_map: false # We're not using any previous saved map
+  rolling_window: false # Global map not moving with robot
+
+  width: 80.0
+  height: 80.0
+  origin_x: -40.0
+  origin_y: -40.0
+  resolution: 0.05

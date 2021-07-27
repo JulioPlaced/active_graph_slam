@@ -1,0 +1,4 @@
+Symlinking /home/julio/source/active_slam_project_github/devel/share/kobuki_plugins/cmake/kobuki_pluginsConfig.cmake
+Symlinking /home/julio/source/active_slam_project_github/devel/share/kobuki_plugins/cmake/kobuki_pluginsConfig-version.cmake
+Symlinking /home/julio/source/active_slam_project_github/devel/lib/libgazebo_ros_kobuki.so
+Symlinking /home/julio/source/active_slam_project_github/devel/lib/pkgconfig/kobuki_plugins.pc

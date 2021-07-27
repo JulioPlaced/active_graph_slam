@@ -1,0 +1,39 @@
+# jplaced@unizar.es
+# 2021, Universidad de Zaragoza
+# This file contains common configuration options for the base local planner
+# See http://wiki.ros.org/base_local_planner
+
+TrajectoryPlannerROS:
+  # Robot Configuration Parameters
+  max_vel_x: 0.2
+  min_vel_x: 0.1
+  max_vel_theta: 0.8
+  min_vel_theta: -0.8
+
+  min_in_place_vel_theta: 0.4
+
+  acc_lim_theta: 2.0
+  acc_lim_x: 2.0
+
+  escape_vel: -0.1
+
+  # Goal Tolerance Parameters
+  yaw_goal_tolerance: 0.1
+  xy_goal_tolerance: 0.1
+
+  # Differential-drive Robot Configuration
+  holonomic_robot: false
+  acc_lim_y: 2.0
+
+  # Trajectory Scoring Parameters
+  meter_scoring: true
+  recovery_behavior_enabled: false
+  clearing_rotation_allowed: false
+  # Dinamic Window Approach (true) vs. Trajectory Rollout (false)
+  dwa: true
+
+  # Oscillation Prevention Parameters
+  oscillation_reset_dist: 0.05
+
+  # Global Plan Parameters
+  prune_plan: true

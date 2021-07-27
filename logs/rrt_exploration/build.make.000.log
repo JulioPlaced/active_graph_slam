@@ -1,0 +1,55 @@
+[35m[1mScanning dependencies of target geometry_msgs_generate_messages_cpp[0m
+[35m[1mScanning dependencies of target _rrt_exploration_generate_messages_check_deps_PointArray[0m
+[35m[1mScanning dependencies of target geometry_msgs_generate_messages_nodejs[0m
+[35m[1mScanning dependencies of target std_msgs_generate_messages_nodejs[0m
+[35m[1mScanning dependencies of target geometry_msgs_generate_messages_lisp[0m
+[35m[1mScanning dependencies of target std_msgs_generate_messages_eus[0m
+[35m[1mScanning dependencies of target std_msgs_generate_messages_cpp[0m
+[35m[1mScanning dependencies of target local_rrt_detector[0m
+[35m[1mScanning dependencies of target geometry_msgs_generate_messages_eus[0m
+[35m[1mScanning dependencies of target global_rrt_detector[0m
+[35m[1mScanning dependencies of target std_msgs_generate_messages_lisp[0m
+[35m[1mScanning dependencies of target geometry_msgs_generate_messages_py[0m
+[35m[1mScanning dependencies of target std_msgs_generate_messages_py[0m
+[  0%] Built target std_msgs_generate_messages_nodejs
+[  0%] Built target geometry_msgs_generate_messages_nodejs
+[  0%] Built target geometry_msgs_generate_messages_cpp
+[  0%] Built target geometry_msgs_generate_messages_py
+[  0%] Built target geometry_msgs_generate_messages_eus
+[  0%] Built target geometry_msgs_generate_messages_lisp
+[  0%] Built target std_msgs_generate_messages_cpp
+[  0%] Built target std_msgs_generate_messages_eus
+[  0%] Built target std_msgs_generate_messages_lisp
+[  0%] Built target std_msgs_generate_messages_py
+[  0%] Built target _rrt_exploration_generate_messages_check_deps_PointArray
+[  6%] [32mBuilding CXX object CMakeFiles/local_rrt_detector.dir/src/local_rrt_detector.cpp.o[0m
+[35m[1mScanning dependencies of target rrt_exploration_generate_messages_py[0m
+[35m[1mScanning dependencies of target rrt_exploration_generate_messages_lisp[0m
+[35m[1mScanning dependencies of target rrt_exploration_generate_messages_cpp[0m
+[35m[1mScanning dependencies of target rrt_exploration_generate_messages_nodejs[0m
+[35m[1mScanning dependencies of target rrt_exploration_generate_messages_eus[0m
+[ 13%] [32mBuilding CXX object CMakeFiles/global_rrt_detector.dir/src/mtrand.cpp.o[0m
+[ 20%] [32mBuilding CXX object CMakeFiles/local_rrt_detector.dir/src/mtrand.cpp.o[0m
+[ 26%] [32mBuilding CXX object CMakeFiles/global_rrt_detector.dir/src/global_rrt_detector.cpp.o[0m
+[ 40%] [32mBuilding CXX object CMakeFiles/local_rrt_detector.dir/src/functions.cpp.o[0m
+[ 40%] [32mBuilding CXX object CMakeFiles/global_rrt_detector.dir/src/functions.cpp.o[0m
+[ 46%] [34m[1mGenerating Python from MSG rrt_exploration/PointArray[0m
+[ 73%] [34m[1mGenerating C++ code from rrt_exploration/PointArray.msg[0m
+[ 73%] [34m[1mGenerating Lisp code from rrt_exploration/PointArray.msg[0m
+[ 73%] [34m[1mGenerating Javascript code from rrt_exploration/PointArray.msg[0m
+[ 73%] [34m[1mGenerating EusLisp code from rrt_exploration/PointArray.msg[0m
+[ 80%] [34m[1mGenerating EusLisp manifest code for rrt_exploration[0m
+[ 80%] Built target rrt_exploration_generate_messages_lisp
+WARNING: Package name "graphD_exploration" does not follow the naming conventions. It should start with a lower case letter and only contain lower case letters, digits, underscores, and dashes.
+[ 80%] Built target rrt_exploration_generate_messages_nodejs
+[ 80%] Built target rrt_exploration_generate_messages_cpp
+[ 86%] [34m[1mGenerating Python msg __init__.py for rrt_exploration[0m
+[ 86%] Built target rrt_exploration_generate_messages_py
+WARNING: Package name "graphD_exploration" does not follow the naming conventions. It should start with a lower case letter and only contain lower case letters, digits, underscores, and dashes.
+[ 86%] Built target rrt_exploration_generate_messages_eus
+[35m[1mScanning dependencies of target rrt_exploration_generate_messages[0m
+[ 86%] Built target rrt_exploration_generate_messages
+[ 93%] [32m[1mLinking CXX executable /home/julio/source/active_slam_project_github/devel/.private/rrt_exploration/lib/rrt_exploration/local_rrt_detector[0m
+[ 93%] Built target local_rrt_detector
+[100%] [32m[1mLinking CXX executable /home/julio/source/active_slam_project_github/devel/.private/rrt_exploration/lib/rrt_exploration/global_rrt_detector[0m
+[100%] Built target global_rrt_detector
