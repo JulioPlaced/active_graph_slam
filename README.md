@@ -6,7 +6,7 @@ Code used for the paper "Fast Uncertainty Quantification for Active Graph SLAM",
 Tested by jplaced for Ubuntu 20.04, ROS Noetic.
 
 Citation
-============
+------------
   * J. A. Placed and J. A. Castellanos, “Fast uncertainty quantification foractive graph slam,” arXiv e-prints:2103.05819, 2021.
   * J. A. Placed and J. A. Castellanos, “Fast  autonomous  robotic  ex-ploration  using  the  underlying  graph  structure,” in 2021 IEEE/RSJInternational  Conference on Intelligent Robots and Systems (IROS). IEEE, 2021, pp. 6649–6656.
 
