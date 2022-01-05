@@ -7,9 +7,9 @@ Tested by jplaced for Ubuntu 20.04, ROS Noetic.
 
 Citation
 ------------
-  * J. A. Placed and J. A. Castellanos, “Fast uncertainty quantification foractive graph slam,” arXiv e-prints:2103.05819, 2021.
-  * J. A. Placed and J. A. Castellanos, “Fast  autonomous  robotic  ex-ploration  using  the  underlying  graph  structure,” in 2021 IEEE/RSJInternational  Conference on Intelligent Robots and Systems (IROS). IEEE, 2021, pp. 6649–6656.
-
+  * Placed, J. A., & Castellanos, J. A. (2021). Fast Uncertainty Quantification for Active Graph SLAM. arXiv preprint arXiv:2110.01289.
+  * Placed, J. A., & Castellanos, J. A. (2021). Fast Autonomous Robotic Exploration Using the Underlying Graph Structure. In 2021 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS) (pp. 6672-6679). IEEE.
+  
 Dependencies:
 ------------
 
