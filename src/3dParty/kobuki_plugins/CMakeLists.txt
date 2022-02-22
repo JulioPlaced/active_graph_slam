@@ -1,8 +1,14 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(kobuki_plugins)
 
-find_package(gazebo REQUIRED)
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+endif(NOT CMAKE_BUILD_TYPE)
+
+find_package(gazebo REQUIRED)
 
 find_package(catkin REQUIRED COMPONENTS gazebo_ros
                                         gazebo_plugins

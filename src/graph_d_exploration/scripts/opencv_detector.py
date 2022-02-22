@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # jplaced@unizar.es
-# 2021, Universidad de Zaragoza
+# 2022, Universidad de Zaragoza
 
 # This node is a frontier detector, but it is not based on RRT. This node uses
 # OpenCV tools to detect frontier points. It is intended to be run alone, and in
@@ -39,15 +39,15 @@ def mapCallBack(data):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Functions~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # OpenCV frontier detector based on Canny algorithm.
-def findFrontiers(mapData):
+def findFrontiers(map_data):
     frontier_points = []
 
-    data = mapData.data
-    w = mapData.info.width
-    h = mapData.info.height
-    resolution = mapData.info.resolution
-    X_origin = mapData.info.origin.position.x
-    Y_origin = mapData.info.origin.position.y
+    data = map_data.data
+    w = map_data.info.width
+    h = map_data.info.height
+    resolution = map_data.info.resolution
+    X_origin = map_data.info.origin.position.x
+    Y_origin = map_data.info.origin.position.y
 
     # Convert occupancy grid map to image
     img = np.zeros((h, w, 1), np.uint8)
@@ -64,16 +64,16 @@ def findFrontiers(mapData):
                 img[i, j] = 205  # green
     o = cv2.inRange(img, 0, 1)
 
-    # Finds contours of the source image and draw them
+    # Find contours of the source image and draw them
     contours = cv2.findContours(o, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)[-2]
     cv2.drawContours(o, contours, -1, (255, 255, 255), 5)
     o = cv2.bitwise_not(o)
 
-    # Finds edges and overlaps them with the contours
+    # Find edges and overlaps them with the contours
     edges = cv2.Canny(img, 0, 255)
     res = cv2.bitwise_and(o, edges)
 
-    # Finds contours on the overlapped image and draw them
+    # Find contours on the overlapped image and draw them
     frontier = deepcopy(res)
     contours = cv2.findContours(frontier, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)[-2]
     cv2.drawContours(frontier, contours, -1, (255, 255, 255), 2)
@@ -120,7 +120,7 @@ def node():
     rate = rospy.Rate(param_1)
 
     exploration_goal = PointStamped()
-    points = createMarker(frame=mapData.header.frame_id, ns="markers", colors=[1.0, 1.0, 0.0])
+    points = createMarker(frame=mapData.header.frame_id, ns="markers", colors=[255, 255, 0.0])
 
     while not rospy.is_shutdown():
         frontiers = findFrontiers(mapData)

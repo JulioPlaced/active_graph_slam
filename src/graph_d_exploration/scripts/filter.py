@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # jplaced@unizar.es
-# 2021, Universidad de Zaragoza
+# 2022, Universidad de Zaragoza
 
 # The filter nodes receives the detected frontier points from all the detectors,
 # filters the points, and passes them to the assigner node to command the robots.
@@ -37,10 +37,10 @@ from graph_d_exploration.cfg import informationGainConfig
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Callbacks~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-mapData_ = OccupancyGrid()
+map_data_ = OccupancyGrid()
 frontiers_ = []
 f_timestamps_ = []
-globalmaps_ = []
+global_map_ = []
 INFORMATION_THRESHOLD_ = 0.45
 
 
@@ -96,74 +96,56 @@ def frontiersCallBack(data, args):
 
 
 def mapCallBack(data):
-    global mapData_
-    mapData_ = data
+    global map_data_
+    map_data_ = data
 
 
 def globalMapCallback(data):
-    global globalmaps_, litraIndx_, namespace_init_count_, n_robots_
-    if n_robots_ > 1:
-        indx = int(data._connection_header['topic'][litraIndx_]) - namespace_init_count_
-    elif n_robots_ == 1:
-        indx = 0
-    globalmaps_[indx] = data
+    global global_map_
+    global_map_ = data
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Node~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def node():
-    global frontiers_, mapData_, globalmaps_, litraIndx_, n_robots_, namespace_init_count_
+    global frontiers_, map_data_, global_map_
     rospy.init_node('filter', anonymous=False)
 
     # Fetch all parameters
     map_topic = rospy.get_param('~map_topic', '/map')
     threshold = rospy.get_param('~costmap_clearing_threshold', 70)
     goals_topic = rospy.get_param('~goals_topic', '/detected_points')
-    n_robots_ = rospy.get_param('~n_robots', 1)
-    namespace = rospy.get_param('~namespace', '')
     rateHz = rospy.get_param('~rate', 50)
     robot_frame = rospy.get_param('~robot_frame', 'base_link')
     global_costmap_topic = rospy.get_param('~global_costmap_topic', '/move_base_node/global_costmap/costmap')
-    namespace_init_count_ = rospy.get_param('namespace_init_count', 1)
 
     srv = Server(informationGainConfig, reconfigureCallback)
 
-    litraIndx_ = len(namespace)
     rate = rospy.Rate(rateHz)
     rospy.Subscriber(map_topic, OccupancyGrid, mapCallBack)
 
-    for i in range(0, n_robots_):
-        globalmaps_.append(OccupancyGrid())
+    global_map_ = OccupancyGrid()
 
-    if len(namespace) > 0:
-        for i in range(0, n_robots_):
-            rospy.Subscriber(global_costmap_topic, OccupancyGrid, globalMapCallback)
-    elif len(namespace) == 0:
-        rospy.Subscriber(global_costmap_topic, OccupancyGrid, globalMapCallback)
+    rospy.Subscriber(global_costmap_topic, OccupancyGrid, globalMapCallback)
 
-    # Wait if map is not received yet
-    while len(mapData_.data) < 1:
-        rospy.loginfo('Filter is waiting for the map.')
+    # Wait if map map has not been received yet
+    while len(map_data_.data) < 1:
+        rospy.loginfo(rospy.get_name() + ': Filter is waiting for the map.')
         rospy.sleep(0.5)
         pass
 
-    # Wait if any of robots' global costmap map is not received yet
-    for i in range(0, n_robots_):
-        while len(globalmaps_[i].data) < 1:
-            rospy.loginfo('Filter is waiting for the global costmap.')
-            rospy.sleep(0.5)
-            pass
+    # Wait if global costmap map has not been received yet
+    while len(global_map_.data) < 1:
+        rospy.loginfo(rospy.get_name() + ': Filter is waiting for the global costmap.')
+        rospy.sleep(0.5)
+        pass
 
     rospy.loginfo("Filter received local and global costmaps.")
 
-    global_frame = "/" + mapData_.header.frame_id
+    global_frame = "/" + map_data_.header.frame_id
     tfLisn = tf.TransformListener()
-    if len(namespace) > 0:
-        for i in range(0, n_robots_):
-            tfLisn.waitForTransform(global_frame[1:], robot_frame, rospy.Time(0), rospy.Duration(10.0))
-    elif len(namespace) == 0:
-        tfLisn.waitForTransform(global_frame[1:], robot_frame, rospy.Time(0), rospy.Duration(10.0))
+    tfLisn.waitForTransform(global_frame[1:], robot_frame, rospy.Time(0), rospy.Duration(10.0))
 
     rospy.Subscriber(goals_topic, PointStamped, callback=frontiersCallBack, callback_args=[tfLisn, global_frame[1:]])
 
@@ -181,14 +163,14 @@ def node():
 
     rospy.loginfo("Filter received frontiers.")
 
-    points = createMarker(frame=mapData_.header.frame_id, ns="raw_frontiers", colors=[1.0, 1.0, 0.0], scale=0.2)
-    points_clust = createMarker(frame=mapData_.header.frame_id, ns="filtered_frontiers", colors=[0.0, 1.0, 0.0])
+    points = createMarker(frame=map_data_.header.frame_id, ns="raw_frontiers", colors=[255, 255, 0.0], scale=0.2)
+    points_clust = createMarker(frame=map_data_.header.frame_id, ns="filtered_frontiers", colors=[0.0, 255, 0.0])
 
     p = Point()
     p.z = 0
 
     tempPointStamped = PointStamped()
-    tempPointStamped.header.frame_id = mapData_.header.frame_id
+    tempPointStamped.header.frame_id = map_data_.header.frame_id
     tempPointStamped.header.stamp = rospy.Time(0)
     tempPointStamped.point.z = 0.0
 
@@ -220,19 +202,18 @@ def node():
             tempPointStamped.point.y = centroids[z][1]
 
             # Remove any frontier inside an occupied cell (threshold)
-            for i in range(0, n_robots_):
-                transformedPoint = tfLisn.transformPoint(globalmaps_[i].header.frame_id, tempPointStamped)
-                x = np.array([transformedPoint.point.x, transformedPoint.point.y])
-                cond = (gridValue(globalmaps_[i], x) >= threshold) or cond
+            transformedPoint = tfLisn.transformPoint(global_map_.header.frame_id, tempPointStamped)
+            x = np.array([transformedPoint.point.x, transformedPoint.point.y])
+            cond = (gridValue(global_map_, x) >= threshold) or cond
 
             # Remove frontiers with low information gain
             if USE_GPU_:
-                ig = informationGain_NUMBA(mapData_.info.resolution, mapData_.info.width,
-                                           mapData_.info.origin.position.x,
-                                           mapData_.info.origin.position.y, np.array(mapData_.data), centroids[z][0],
+                ig = informationGain_NUMBA(map_data_.info.resolution, map_data_.info.width,
+                                           map_data_.info.origin.position.x,
+                                           map_data_.info.origin.position.y, np.array(map_data_.data), centroids[z][0],
                                            centroids[z][1], 1.0)
             else:
-                ig = informationGain(mapData_, [centroids[z][0], centroids[z][1]], 1.0)
+                ig = informationGain(map_data_, [centroids[z][0], centroids[z][1]], 1.0)
 
             cond = (ig < INFORMATION_THRESHOLD_) or cond
             # Since radius=1 -> maximum ig=2pi. If less than 15%, delete frontier

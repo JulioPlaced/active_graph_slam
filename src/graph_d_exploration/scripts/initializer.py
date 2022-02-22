@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # jplaced@unizar.es
-# 2021, Universidad de Zaragoza
+# 2022, Universidad de Zaragoza
 
 # This node initializes the frontier detectors with a pre defined starting map
 # size.

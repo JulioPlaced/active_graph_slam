@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # jplaced@unizar.es
-# 2021, Universidad de Zaragoza
+# 2022, Universidad de Zaragoza
 
 # This node recieve target exploration goals, which are the filtered frontier
 # points published by the filter node, and commands the robot accordingly. The
@@ -17,11 +17,14 @@ import heapq
 
 from copy import deepcopy
 
-from constants import GRAPH_PATH_, PENALTY_, PLAN_POINT_TH_, EXPLORING_TIME_, USE_GPU_
+from constants import GRAPH_PATH_, PLAN_POINT_TH_, EXPLORING_TIME_, USE_GPU_, SHOW_DEBUG_PATH_, ODOM_COV_
 
 from functions import robot, wait_enterKey, getGraph
 from weighted_pose_graph_class import weighted_pose_graph
 from graph_d_exploration.msg import PointArray
+
+from visualization_msgs.msg import Marker, MarkerArray
+import matplotlib.pyplot as plt
 
 if USE_GPU_:
     from functions import cellInformation_NUMBA
@@ -30,10 +33,13 @@ else:
 
 from nav_msgs.msg import OccupancyGrid, Path
 
+
+ODOM_FIM_ = np.linalg.inv(ODOM_COV_) / 2
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Callbacks~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-mapData_ = OccupancyGrid()
+map_data_ = OccupancyGrid()
 frontiers_ = []
 
 
@@ -45,8 +51,8 @@ def frontiersCallBack(data):
 
 
 def mapCallBack(data):
-    global mapData_
-    mapData_ = data
+    global map_data_
+    map_data_ = data
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -59,94 +65,118 @@ def hallucinateGraph(G, p_frontier, info_radius):
     # Initialize hallucinated graph
     G_frontier = weighted_pose_graph()
     G_frontier.copy_graph(G.graph)
-    n = float(G.get_no_nodes())
-    id_last = n - 1
-    id_new = id_last
+    n = G.get_no_nodes()
+
+    failed_hallucination = False
 
     # Pose of last known node
     temp = nx.get_node_attributes(G.graph, 'pose')
     p_last = np.array(temp[n - 1])
-    temp = nx.get_node_attributes(G.graph, 'theta')
-    th_last = temp[n - 1]
 
     # Hallucinate path
     plan = Path()
     plan = robot_.makePlan(robot_.getPosition(), p_frontier)
-    n_plan = len(plan)
+    n_points = int(len(plan))
 
-    # Add new nodes & edges along the hallucinated path to the new frontier
-    plan_nodes = np.ceil(n_plan // PLAN_POINT_TH_)
-    new_nodes = np.sort(np.random.choice(np.arange(0, n_plan - 1), int(plan_nodes), replace=False))
+    if n_points > 1:
+        # Add new nodes & edges along the hallucinated path to the new frontier
+        plan_nodes = np.ceil(n_points / PLAN_POINT_TH_)
+        new_nodes = np.sort(np.random.choice(np.arange(1, n_points - 2), int(plan_nodes), replace=False))
+        new_nodes = np.append(new_nodes, n_points-1)  # Add one last node at frontier's location
 
-    for i in new_nodes:
+        id_last = id_new = n - 1
+        last_known_Info = G_frontier.graph.edges([id_last], 'information')
 
-        id_new += 1
-        p_path = np.array([plan[i].pose.position.x, plan[i].pose.position.y])
-        th_path = np.arctan2(p_path[1] - p_last[1], p_path[0] - p_last[0])
-        G_frontier.graph.add_node(id_new, pose=p_path, theta=th_path)
+        # wait_enterKey()
+        for i in new_nodes:
+            p_path = np.array([plan[i].pose.position.x, plan[i].pose.position.y])
+            th_path = np.arctan2(p_path[1] - p_last[1], p_path[0] - p_last[0])
 
-        delta_path_p = p_path - p_last
-        delta_path_th = th_path - th_last
-        edges_Info = G_frontier.graph.edges([id_last], 'information')
+            id_new += 1
+            G_frontier.graph.add_node(id_new, pose=p_path, theta=th_path)
 
-        if len(list(edges_Info)[0]) == 3:
-            fim_path = np.array(list(edges_Info)[0][2]) * PENALTY_  # The longer the path the smaller the FIM
-            # Account for the expected unknown region that will be seen in the hallucinated path
-            if USE_GPU_:
-                normalized_unk_region_info_i, LC_info_i = cellInformation_NUMBA(np.array(mapData_.data),
-                                                                                mapData_.info.resolution,
-                                                                                mapData_.info.width,
-                                                                                mapData_.info.origin.position.x,
-                                                                                mapData_.info.origin.position.y,
-                                                                                p_path[0], p_path[1], info_radius)
-            else:
-                normalized_unk_region_info_i, LC_info_i = cellInformation(mapData_, [p_path[0], p_path[1]], info_radius)
+            last_Info = G_frontier.graph.edges([id_last], 'information')
 
-            # Account for the expected unknown region that exists in that frontier
-            fim_path *= (1 + normalized_unk_region_info_i)
-            # Account for potential LC's
-            fim_path *= (1 + LC_info_i / 2)
-            G_frontier.addEdge(id_last, id_new, 0, [delta_path_p, delta_path_th], fim_path)
-            # Update variables
-            id_last = id_new
-            p_last = p_path
-            th_last = th_path
-        else:
-            rospy.logwarn("Error in Information matrix - Check graph.")
+            try:
+                if list(last_Info)[0] and len(list(last_Info)[0]) == 3:
+                    """
+                    I = np.array(list(last_Info)[0][2])
+                    last_FIM = [[I[0], I[1], I[2]],
+                               [I[1], I[3], I[4]],
+                               [I[2], I[4], I[5]]]
+                    new_cov = np.linalg.inv(last_FIM) + ODOM_COV_
+                    new_FIM = np.linalg.inv(new_cov)
+                    """
+                    # Account for the expected unknown region that will be seen in the hallucinated path
+                    if USE_GPU_:
+                        normalized_unk_region_info_i, LC_info_i = cellInformation_NUMBA(np.array(map_data_.data),
+                                                                                        map_data_.info.resolution,
+                                                                                        map_data_.info.width,
+                                                                                        map_data_.info.origin.position.x,
+                                                                                        map_data_.info.origin.position.y,
+                                                                                        p_path[0], p_path[1], info_radius)
+                    else:
+                        normalized_unk_region_info_i, LC_info_i = cellInformation(map_data_,
+                                                                                  [p_path[0], p_path[1]],
+                                                                                  info_radius)
 
-    # Add new hallucinated frontier node with corresponding constraint
-    id_frontier = id_last + 1
-    th_frontier = np.arctan2(p_frontier[1] - p_last[1], p_frontier[0] - p_last[0])
-    G_frontier.graph.add_node(id_frontier, pose=p_frontier, theta=th_frontier)
-    delta_p = p_frontier - p_last
-    delta_th = th_frontier - th_last
-    frontier_Info = G_frontier.graph.edges([id_last], 'information')
-    fim_frontier = np.array(list(frontier_Info)[0][2]) * PENALTY_  # The longer the path the smaller the FIM
+                    # Account for the expected unknown region that exists in that frontier
+                    new_FIM = ODOM_FIM_ * (1 + normalized_unk_region_info_i)
 
-    if USE_GPU_:
-        normalized_unk_region_info, LC_info = cellInformation_NUMBA(np.array(mapData_.data), mapData_.info.resolution,
-                                                                    mapData_.info.width,
-                                                                    mapData_.info.origin.position.x,
-                                                                    mapData_.info.origin.position.y,
-                                                                    p_frontier[0], p_frontier[1], info_radius)
-    else:
-        normalized_unk_region_info, LC_info = cellInformation(mapData_, [p_frontier[0], p_frontier[1]], info_radius)
+                    G_frontier.addEdge(id_last, id_new, 0, [new_FIM[0][0], new_FIM[0][1], new_FIM[0][2],
+                                                            new_FIM[1][1], new_FIM[1][2],
+                                                            new_FIM[2][2]])
 
-    # Account for the expected unknown region that exists in that frontier
-    fim_frontier *= (1 + normalized_unk_region_info)
-    # Account for potential LC's
-    fim_frontier *= (1 + LC_info / 2)
+                    # print("od_info: " + format(1 + 2*normalized_unk_region_info_i))
 
-    G_frontier.addEdge(id_last, id_frontier, 0, [delta_p, delta_th], fim_frontier)
+                    # Account for LC
+                    LC_candidates = G_frontier.find_overlapping_neighbors(id_new, 2.0)
+                    if LC_info_i > 0.03:  # If there is any structure in the region to close loops
+                        I = np.array(list(last_known_Info)[0][2])
+                        # I2 = np.array(list(last_Info)[0][2])
+                        for j in LC_candidates:
+                            # if np.random.random() > LC_info_i:
+                            loop_diff = np.abs(j-id_new)/G_frontier.get_no_nodes()
 
-    return G_frontier
+                            j_FIM = G_frontier.graph.edges([j], 'information')
+                            I_j = np.array(list(j_FIM)[0][2])
+                            FIM_LC = np.abs(I_j-I) * (0.+1.5*(loop_diff*LC_info_i))
+                            # FIM_LC = I * (loop_diff*LC_info_i)
+
+                            G_frontier.addEdge(j, id_new, 1, FIM_LC)
+
+                    # Update variables
+                    id_last = id_new
+                    p_last = p_path
+                else:
+                    rospy.logwarn("Error in Information matrix - Check graph.")
+            except IndexError:
+                pass
+
+        # Save points along path as MarkerArray for visualization purposes
+        if SHOW_DEBUG_PATH_:
+            marker_hallucinated_graph_pub_.publish(G_frontier.getGraphAsMarkerArray())
+            fig, ax = plt.subplots()
+            ax.spy(G_frontier.compute_L(), precision=0, alpha=1, markersize=3)
+            ax.spy(G.compute_L(), precision=0, color='r', alpha=1, markersize=3)
+            plt.show()
+            wait_enterKey()
+
+    else:  # Void returns if no points in path, most times due to frontiers lying in high potential area of cost map
+        failed_hallucination = True
+        rospy.logerr(rospy.get_name() + ": No points in plan to frontier at " + format(p_frontier) +
+                     ". Probably a high potential area!!")
+
+    return G_frontier, failed_hallucination
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Node~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def node():
-    global frontiers_, mapData_, robot_
+    global frontiers_, map_data_, robot_
+    if SHOW_DEBUG_PATH_:
+        global marker_hallucinated_graph_pub_
 
     rospy.init_node('assigner', anonymous=False)
 
@@ -156,18 +186,21 @@ def node():
     namespace = rospy.get_param('~namespace', '')
     rateHz = rospy.get_param('~rate', 1)
     namespace_init_count = rospy.get_param('namespace_init_count', 1)
-    delay_after_assignement = rospy.get_param('~delay_after_assignement', 0.5)
+    delay_after_assignment = rospy.get_param('~delay_after_assignment', 0.5)
 
     rate = rospy.Rate(rateHz)
     rospy.Subscriber(map_topic, OccupancyGrid, mapCallBack)
     rospy.Subscriber(frontiers_topic, PointArray, frontiersCallBack)
+
+    if SHOW_DEBUG_PATH_:
+        marker_hallucinated_graph_pub_ = rospy.Publisher('marker_hallucinated_graph', MarkerArray, queue_size=10)
 
     # Wait if no frontier is received yet
     while len(frontiers_) < 1:
         pass
 
     # Wait if map is not received yet
-    while len(mapData_.data) < 1:
+    while len(map_data_.data) < 1:
         pass
 
     robot_name = namespace + str(namespace_init_count)
@@ -176,11 +209,15 @@ def node():
 
     # Get ROS time in seconds
     t_0 = rospy.get_time()
+    t_f_acc_decision_making = 0
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     while not rospy.is_shutdown():
 
         rospy.sleep(1)
+
+        t_0_decision_making = rospy.get_time()
+
         centroids = deepcopy(frontiers_)
 
         originalLen = len(centroids)
@@ -208,7 +245,7 @@ def node():
         # If only one frontier no need to evaluate anything. Select that frontier
         if n_centroids == 1:
             rospy.logwarn("Only one frontier detected. Selecting it.")
-            infoGain.append(np.random.rand(1, 1))
+            infoGain.append(np.ndarray.flatten(np.random.rand(1, 1)))
         # If no edges (starting step) do not evaluate D-opt. Select random frontier
         elif m < 1:
             rospy.logwarn("Graph not started yet, m < 1. Selecting goal +=[0.1,0.1].")
@@ -220,18 +257,24 @@ def node():
                 p_frontier = np.array([centroids[ip][0], centroids[ip][1]])
 
                 # Compute hallucinated pose graph
-                G_frontier = hallucinateGraph(G, p_frontier, info_radius)
-
-                # Compute no. of spanning trees <=> D-opt(FIM)
-                n_frontier = float(G_frontier.get_no_nodes())
-                L_anch = G_frontier.compute_anchored_L()
-                _, t = np.linalg.slogdet(L_anch.todense())
-                spann = n_frontier ** (1 / n_frontier) * np.exp(t / n_frontier)
-                infoGain.append(spann)
+                G_frontier, flag = hallucinateGraph(G, p_frontier, info_radius)
+                if flag:
+                    rospy.logerr(rospy.get_name() + ": No points in plan to frontier at " + format(p_frontier) +
+                                 ". Assigning -Inf information!!")
+                    infoGain.append(-np.inf)
+                else:
+                    # Compute no. of spanning trees <=> D-opt(FIM)
+                    n_frontier = float(G_frontier.get_no_nodes())
+                    L_anch = G_frontier.compute_anchored_L()
+                    _, t = np.linalg.slogdet(L_anch.todense())
+                    spann = n_frontier ** (1 / n_frontier) * np.exp(t / n_frontier)
+                    infoGain.append(spann)
 
         if robot_.getState() == 1:
+            t_f_acc_decision_making += rospy.get_time() - t_0_decision_making
             rospy.logwarn("Robot is not available.")
         elif closer_goal:
+            t_f_acc_decision_making += rospy.get_time() - t_0_decision_making
             robot_.sendGoal(robot_.getPosition() + [0.1, 0.1])
         else:
             infoGain_record = []
@@ -243,15 +286,17 @@ def node():
 
             winner_id = infoGain_record.index(np.max(infoGain_record))
 
-            rospy.loginfo("Information record: " + str(infoGain_record))
-            rospy.loginfo("Centroids record: " + str(centroid_record))
+            t_f_acc_decision_making += rospy.get_time() - t_0_decision_making
+
+            rospy.loginfo("Information record: [Reward, X, Y] \n" +
+                          format(np.column_stack((infoGain_record, centroid_record))))
             rospy.loginfo(robot_name + " assigned to " + str(centroid_record[winner_id]))
 
             initial_plan_position = robot_.getPosition()
             robot_.sendGoal(centroid_record[winner_id])
 
             # If plan fails near to starting position, send new goal to the next best frontier
-            if robot_.getState() != 3:
+            if robot_.getState() != 3 and n_centroids != 1:
                 norm = np.linalg.norm(robot_.getPosition() - initial_plan_position)
                 if norm <= 2.0:
                     try:
@@ -265,9 +310,11 @@ def node():
                 else:
                     rospy.logwarn("Goal aborted away from previous pose (eucl = " + str(norm) + "). Recomputing.")
 
-            rospy.sleep(delay_after_assignement)
+            rospy.sleep(delay_after_assignment)
 
         t_f = rospy.get_time() - t_0  # Get ROS time in seconds
+        rospy.loginfo("Decision making accumulated time: " + format(t_f_acc_decision_making) + " [sec]" +
+                      " \n Total consumed time: " + format(t_f) + " [sec]")
         if t_f >= EXPLORING_TIME_:
             wait_enterKey()
         rate.sleep()

@@ -1,12 +1,12 @@
 <!-- jplaced@unizar.es
- 2021, Universidad de Zaragoza -->
+ 2022, Universidad de Zaragoza -->
 
 <!--  Launch file for single robot on Gazebo -->
 <launch>
   <env name="GAZEBO_RESOURCE_PATH" value="$(find graph_d_exploration)/launch/include/meshes"/>
 
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="gui" value="true"/>
+    <arg name="gui" value="false"/>
     <arg name="use_sim_time" value="true"/>
     <arg name="debug" value="0"/>
     <arg name="world_name" value="$(find graph_d_exploration)/launch/include/worlds/willowgarage_modified.world"/>

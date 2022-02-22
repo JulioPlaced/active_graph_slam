@@ -1,5 +1,5 @@
 <!-- jplaced@unizar.es
- 2021, Universidad de Zaragoza -->
+ 2022, Universidad de Zaragoza -->
 
 <!-- Move base with SLAM karto -->
 
@@ -24,7 +24,9 @@
     <rosparam file="$(find graph_d_exploration)/param/local_costmap_params.yaml" command="load" />
     <rosparam file="$(find graph_d_exploration)/param/global_costmap_params.yaml" command="load" />
     <rosparam file="$(find graph_d_exploration)/param/base_local_planner_params.yaml" command="load" />
+    <rosparam file="$(find graph_d_exploration)/param/base_global_planner_params.yaml" command="load" />
 
+    <param name="max_planning_retries" value="1"/>
     <param name="recovery_behavior_enabled" value="true"/>
     <rosparam file="$(find graph_d_exploration)/param/recovery_behaviors.yaml" command="load" />
   </node>

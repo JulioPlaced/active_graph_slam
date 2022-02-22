@@ -1,5 +1,5 @@
 <!-- jplaced@unizar.es
- 2021, Universidad de Zaragoza -->
+ 2022, Universidad de Zaragoza -->
 
 <!-- Launch file for the dopt_exploration -->
 <launch>
@@ -48,7 +48,7 @@
     <param name="rate" value="1"/>
   </node>
 
-  <node pkg="graph_d_exploration" type="controller_graphD_stopping_criteria.py" name="assigner" output="screen">
+  <node pkg="graph_d_exploration" type="controller_graphD.py" name="assigner" output="screen">
     <param name="map_topic" value="/map"/>
     <param name="global_frame" value="map"/>
     <param name="frontiers_topic" value="/filtered_points"/>
@@ -56,7 +56,7 @@
     <param name="n_robots" value="1"/>
     <param name="delay_after_assignement" value="0.1"/>
     <param name="rate" value="1"/>
-    <param name="info_radius" value="1"/>
+    <param name="info_radius" value="1.5"/>
   </node>
 
 </launch>

@@ -1,22 +1,27 @@
 # jplaced@unizar.es
-# 2021, Universidad de Zaragoza
+# 2022, Universidad de Zaragoza
 # This file contains common configuration options for recovery behaviors
 # See http://wiki.ros.org/rotate_recovery & http://wiki.ros.org/clear_costmap_recovery?distro=noetic
 
 recovery_behaviors:
   - name: 'rotate_recovery'
     type: 'rotate_recovery/RotateRecovery'
-  # - name: 'conservative_reset'
-  #   type: 'clear_costmap_recovery/ClearCostmapRecovery'
-  - name: 'aggressive_reset'
+  - name: 'conservative_reset'
     type: 'clear_costmap_recovery/ClearCostmapRecovery'
+#  - name: 'aggressive_reset'
+#    type: 'clear_costmap_recovery/ClearCostmapRecovery'
 
 conservative_reset:
   force_updating: true
+  layer_names: [ "obstacle_layer" ]
+  clearable_layers: [ "obstacle_layer" ]
   affected_maps: both
-  reset_distance: 1.5
+  invert_area_to_clear: true
+  reset_distance: 3.0
 
 aggressive_reset:
   force_updating: true
   affected_maps: both
+  layer_names: ["obstacle_layer"]
+  clearable_layers: ["obstacle_layer"]
   reset_distance: 0.0

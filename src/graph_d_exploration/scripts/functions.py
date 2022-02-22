@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # jplaced@unizar.es
-# 2021, Universidad de Zaragoza
+# 2022, Universidad de Zaragoza
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Include modules~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -14,6 +14,9 @@ import numpy as np
 import numba as nb
 from numba import cuda
 
+import networkx as nx
+import scipy
+
 from numpy.linalg import norm
 
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
@@ -21,7 +24,10 @@ from nav_msgs.srv import GetPlan
 from geometry_msgs.msg import PoseStamped
 from visualization_msgs.msg import Marker
 
+from nptyping import ndarray
+
 cuda.select_device(0)
+
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Classes~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -48,7 +54,7 @@ class robot:
                 self.position = np.array([trans[0], trans[1]])
                 cond = 1
             except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
-                # rospy.logerror(tf.LookupException);
+                # rospy.logerr(tf.LookupException);
                 cond = 0
         rospy.loginfo('Robot Class received the robot transform.')
         self.assigned_point = self.position
@@ -83,7 +89,7 @@ class robot:
         theta = np.arctan2(robot.goal.target_pose.pose.position.y - current_pos[1],
                            robot.goal.target_pose.pose.position.x - current_pos[0])
         robot.goal.target_pose.pose.orientation.x, robot.goal.target_pose.pose.orientation.y, \
-            robot.goal.target_pose.pose.orientation.z, robot.goal.target_pose.pose.orientation.w = \
+        robot.goal.target_pose.pose.orientation.z, robot.goal.target_pose.pose.orientation.w = \
             euler2quaternion(0.0, 0.0, theta)
         self.client.send_goal(robot.goal)
         self.assigned_point = np.array(point)
@@ -96,7 +102,7 @@ class robot:
         theta = np.arctan2(robot.goal.target_pose.pose.position.y - current_pos[1],
                            robot.goal.target_pose.pose.position.x - current_pos[0])
         robot.goal.target_pose.pose.orientation.x, robot.goal.target_pose.pose.orientation.y, \
-            robot.goal.target_pose.pose.orientation.z, robot.goal.target_pose.pose.orientation.w = \
+        robot.goal.target_pose.pose.orientation.z, robot.goal.target_pose.pose.orientation.w = \
             euler2quaternion(0.0, 0.0, theta)
         self.client.send_goal(robot.goal)
         self.assigned_point = np.array(point)
@@ -220,18 +226,18 @@ def getGraph(filename):
     with open(filename) as fp:
         lines = fp.readlines()
         for x in lines:
-            type = x.split(' ')[0]
-            if type == "VERTEX_SE2":
+            edge_type = x.split(' ')[0]
+            if edge_type == "VERTEX_SE2":
                 node = np.float_(x.split(' ')[1])
                 pose = np.float_(x.split(' ')[2:5])
                 nodes.append(np.concatenate([np.array([node]), pose]).ravel())
-            elif type == "EDGE_SE2":
+            elif edge_type == "EDGE_SE2":
                 node1 = np.float_(x.split(' ')[1])
                 node2 = np.float_(x.split(' ')[2])
-                type = 0 if (abs(node1 - node2) == 1) else 1
+                etype = 0 if (abs(node1 - node2) == 1) else 1
                 delta = np.float_(x.split(' ')[3:6])
-                FIM = np.float_(x.split(' ')[6:12])
-                edges.append(np.concatenate([np.array([node1, node2, type]), delta, FIM]).ravel())
+                FIM = np.float_(x.split(' ')[7:13])
+                edges.append(np.concatenate([np.array([node1, node2, etype]), delta, FIM]).ravel())
 
     return nodes, edges
 
@@ -252,7 +258,14 @@ def euler2quaternion(roll, pitch, yaw):
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-def createMarker(type="point", frame="/map", ns="marker_ns", lifetime=0.12, colors=[255, 0, 0], alpha=1.0, scale=0.3):
+def createMarker(mtype: str = "point", frame: str = "/map", ns: str = "marker_ns", lifetime: float = 0.12,
+                 colors: ndarray = None, alpha: float = 1.0, scale: float = 0.3) -> Marker:
+    """
+    Initializes a ROS visualization_msgs Marker
+    """
+    if colors is None:
+        colors = [255, 0, 0]
+
     marker = Marker()
     marker.header.frame_id = frame
     marker.header.stamp = rospy.Time.now()
@@ -261,18 +274,40 @@ def createMarker(type="point", frame="/map", ns="marker_ns", lifetime=0.12, colo
     marker.action = Marker.ADD
     marker.pose.orientation.w = 1.0
     marker.color.a = alpha
-    marker.color.r = colors[0]
-    marker.color.g = colors[1]
-    marker.color.b = colors[2]
+    marker.color.r = colors[0] / 255
+    marker.color.g = colors[1] / 255
+    marker.color.b = colors[2] / 255
     marker.lifetime = rospy.Duration(lifetime)
-    marker.scale.x = marker.scale.y = scale
 
-    if type == "sphere":
+    marker.pose.orientation.x = 0.0
+    marker.pose.orientation.y = 0.0
+    marker.pose.orientation.z = 0.0
+    marker.pose.orientation.w = 1.0
+
+    if mtype == "point":
+        marker.type = Marker.POINTS
+        marker.scale.x = marker.scale.y = scale
+    elif mtype == "sphere":
         marker.type = Marker.SPHERE
+        marker.scale.x = marker.scale.y = marker.scale.z = scale  # Diameter
+    elif mtype == "arrow":
+        marker.type = Marker.ARROW
+        marker.scale.x = scale  # Arrow length
+        marker.scale.y = marker.scale.z = 0.05  # Arrow head diameter and length
+    elif mtype == "cube":
+        marker.type = Marker.CUBE
+        marker.scale.x = marker.scale.y = marker.scale.z = scale
+    elif mtype == "circumference":
+        marker.type = Marker.SPHERE
+        marker.scale.x = marker.scale.y = scale
         marker.scale.z = 0.05
         marker.pose.position.z = 0.0
-    elif type == "point":
-        marker.type = Marker.POINTS
+    elif mtype == "lines":
+        marker.type = Marker.LINE_STRIP
+        marker.pose.position.x = 0.0
+        marker.pose.position.y = 0.0
+        marker.pose.position.z = 0.0
+        marker.scale.x = scale
 
     return marker
 

@@ -1,5 +1,5 @@
 # jplaced@unizar.es
-# 2021, Universidad de Zaragoza
+# 2022, Universidad de Zaragoza
 # This file contains common configuration options for the base local planner
 # See http://wiki.ros.org/base_local_planner
 
@@ -27,6 +27,13 @@ TrajectoryPlannerROS:
 
   # Trajectory Scoring Parameters
   meter_scoring: true
+#  pdist_scale: 0.8
+#  gdist_scale: 0.7
+  path_distance_bias: 50
+  goal_distance_bias: 20
+  forward_point_distance: 0.2
+  occdist_scale: 0.01
+
   recovery_behavior_enabled: false
   clearing_rotation_allowed: false
   # Dinamic Window Approach (true) vs. Trajectory Rollout (false)
