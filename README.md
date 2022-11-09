@@ -1,7 +1,7 @@
 Active Graph SLAM Project
 ============
 
-Code used for the paper "Fast Uncertainty Quantification for Active Graph SLAM", which extends our previous work accepted for presentation in IROS 2021 "Fast Autonomous Robotic Exploration Using the Underlying Graph Structure".
+Code used for the papers "Fast Autonomous Robotic Exploration Using the Underlying Graph Structure" and "A General Relationship between Optimality Criteria and Connectivity Indices for Active Graph-SLAM".
 
 Tested by jplaced for Ubuntu 20.04, ROS Noetic.
 
