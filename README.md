@@ -7,8 +7,8 @@ Tested by jplaced for Ubuntu 20.04, ROS Noetic.
 
 Citation
 ------------
-  * Placed, J. A., & Castellanos, J. A. (2022). A General Relationship between Optimality Criteria and Connectivity Indices for Active Graph-SLAM. arXiv preprint arXiv:2110.01289.
-  * Placed, J. A., & Castellanos, J. A. (2021). Fast Autonomous Robotic Exploration Using the Underlying Graph Structure. In 2021 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS) (pp. 6672-6679). IEEE.
+  * Placed, J. A., & Castellanos, J. A. (2022). A General Relationship between Optimality Criteria and Connectivity Indices for Active Graph-SLAM. IEEE Robotics and Automation Letters, vol. 8, no. 2, pp. 816-823, doi: 10.1109/LRA.2022.3233230.
+  * Placed, J. A., & Castellanos, J. A. (2021). Fast Autonomous Robotic Exploration Using the Underlying Graph Structure. 2021 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS) (pp. 6672-6679), doi: 10.1109/IROS51168.2021.9636148
 
 Dependencies:
 ------------
